@@ -1,8 +1,11 @@
 <?php
 
 namespace App\Http\Controllers;
-
+use App\Doctor;
+use Barryvdh\DomPDF\Facade as PDF;
 use Illuminate\Http\Request;
+
+
 
 class DoctorController extends Controller
 {
@@ -11,10 +14,18 @@ class DoctorController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
+  
+
+    public function _construc()
+      {
+          $this->middleware('auth');
+      }
+
+     
     public function index()
     {
-        $doctor=Doctor::orderBy('id','asc')->paginate(5);
-        return view ('Doctores.index',compact('doctores'));
+        $doctores=Doctor::orderBy('id','asc')->paginate(5);
+        return view ('doctores.index',compact('doctores'));
     }
 
     /**
@@ -24,7 +35,7 @@ class DoctorController extends Controller
      */
     public function create()
     {
-        //
+        return view('doctores.create');
     }
 
     /**
@@ -35,7 +46,14 @@ class DoctorController extends Controller
      */
     public function store(Request $request)
     {
-        //
+        $request->validate([
+            'nombre'=> 'required',
+            'especialidad'=> 'required',
+            'telefono'=> 'required',
+        ]);
+    Doctor::create($request->all());
+    return redirect()->route('doctores.index')
+    ->with('success','Doctor creado exitosamente');
     }
 
     /**
@@ -44,9 +62,11 @@ class DoctorController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function show($id)
-    {
-        //
+    public function show()
+    { 
+        $doctores = Doctor::all();
+        $pdf = PDF::loadview('doctores.mostrar',compact('doctores'));
+        return $pdf->stream();
     }
 
     /**
@@ -57,7 +77,8 @@ class DoctorController extends Controller
      */
     public function edit($id)
     {
-        //
+        $doctores=Doctor::find($id);
+        return view ('doctores.edit',compact('doctores'));
     }
 
     /**
@@ -69,7 +90,14 @@ class DoctorController extends Controller
      */
     public function update(Request $request, $id)
     {
-        //
+        $request->validate([
+            'nombre'=> 'required',
+            'especialidad'=> 'required',
+            'telefono'=> 'required',
+          ]);
+        Doctor::find($id)->update($request->all());
+        return redirect()->route('doctores.index')->
+        with('success','El doctor fue actualizado correctamente');
     }
 
     /**
@@ -80,6 +108,8 @@ class DoctorController extends Controller
      */
     public function destroy($id)
     {
-        //
+        Doctor::find($id)->delete();
+        return redirect()->route('doctores.index')->
+        with('success','El doctor fue eliminado ');
     }
 }

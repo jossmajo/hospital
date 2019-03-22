@@ -13,4 +13,10 @@
 
 Route::get('/', function () {
     return view('welcome');
+
 });
+Route::resource('doctores','DoctorController');
+Route::get('doctores.show','DoctorController@show');
+Auth::routes();
+
+Route::get('/home', 'HomeController@index')->name('home');
